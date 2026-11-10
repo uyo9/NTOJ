@@ -29,6 +29,8 @@ a {
 
     var onResize = null;
     var currentPdf = null;
+    var renderGen = 0;
+    var activeRenderTasks = [];
 
     function init() {
         let PDFJS = pdfjsLib;
@@ -42,7 +44,6 @@ a {
         $('#tags').focusout(function(event) {
             var tags = event.target.value;
             if (tags.search(/^[a-zA-Z0-9-_, ]+$/) != -1 || tags.length == 0) {
-                // valid
                 $('#tags-invalid').hide();
                 $.post(`{{ url('/be/set-tags') }}`, {
                     'pro_id': {{ pro.pro_id }},
@@ -51,7 +52,6 @@ a {
                     $('#tags-done').show();
                 });
             } else {
-                // invalid
                 event.target.focus();
                 $('#tags-invalid').show();
             }
@@ -79,7 +79,6 @@ a {
         });
 
         let resizeTimer = null;
-        let embedResizeTimer = null;
         let lastWindowWidth = window.innerWidth;
         let lastWindowHeight = window.innerHeight;
 
@@ -99,13 +98,6 @@ a {
                 }
             } else if (viewer == 2) {
                 _resize_pdf_embed_viewer();
-
-                if (widthChanged) {
-                    clearTimeout(embedResizeTimer);
-                    embedResizeTimer = setTimeout(function() {
-                        _load_pdf_embed();
-                    }, 250);
-                }
             }
         };
         $(window).on('resize', onResize);
@@ -168,6 +160,16 @@ a {
 
         function _render_pdf_pages(pdf) {
             if (!pdf) return;
+
+            activeRenderTasks.forEach(function(task) {
+                try {
+                    task.cancel();
+                } catch (e) {}
+            });
+            activeRenderTasks = [];
+
+            const gen = ++renderGen;
+
             j_cont.empty();
 
             for (let i = 1; i <= pdf.numPages; i++) {
@@ -180,6 +182,8 @@ a {
             for (let i = 0; i < pdf.numPages; i++) {
                 pdf.getPage(i + 1).then(function(idx) {
                     return function(page) {
+                        if (gen !== renderGen) return;
+
                         let j_page = $('#pdf-page-' + idx);
                         let j_canvas = $('<canvas style="margin: 0; display:block;"></canvas>');
 
@@ -209,15 +213,26 @@ a {
 
                         j_page.append(j_div);
 
-                        page.render({canvasContext: ctx, viewport: viewport}).promise.then(function () {
+                        const renderTask = page.render({canvasContext: ctx, viewport: viewport});
+                        activeRenderTasks.push(renderTask);
+
+                        renderTask.promise.then(function () {
+                            if (gen !== renderGen) return;
+                            
                             return page.getTextContent();
                         }).then(function (text) {
+                            if (gen !== renderGen || !text) return;
+
                             const textLayer = new PDFJS.TextLayer({
                                 textContentSource: text,
                                 container: j_div[0],
                                 viewport: page.getViewport({scale: scale}),
                             });
                             textLayer.render();
+                        }).catch(function (err) {
+                            if (err?.name !== 'RenderingCancelledException') {
+                                console.error(`Failed to load the page ${idx}: `, err);
+                            }
                         });
                     };
                 }(i + 1));
@@ -230,6 +245,9 @@ a {
             PDFJS.getDocument(pdf_url).promise.then(function(pdf) {
                 currentPdf = pdf;
                 _render_pdf_pages(currentPdf);
+            }).catch(function(err) {
+                console.error("Failed to load pdf: ", err);
+                j_cont.html('<strong>Failed to load PDF.<br />Please reload the page.</strong>');
             });
         }
 
@@ -240,6 +258,20 @@ a {
             var embed = $(`<embed width="100%" height="100%" src="${pdf_url}#view=FitH" type="application/pdf">`);
             j_cont.append(embed);
         }
+
+        function _listen_dpr_change() {
+            var dpr = window.devicePixelRatio || 1;
+            const mq = window.matchMedia(`(resolution: ${dpr}dppx)`);
+            mq.addEventListener('change', function() {
+                if (viewer === 1 && currentPdf) {
+                    _render_pdf_pages(currentPdf);
+                }
+
+                _listen_dpr_change();
+            }, { once: true });
+        }
+        _listen_dpr_change();
+
         _load_html();
     }
 

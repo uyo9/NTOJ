@@ -98,8 +98,12 @@
                                 </select>
 
                                 {% if replied %}
-                                    <textarea class="form-control" cols="8" rows="4" style="white-space: pre-line">
-                {{ question['reply_content'] }}</textarea>
+                                    <textarea
+                                        class="form-control"
+                                        cols="8"
+                                        rows="4"
+                                        style="white-space: pre-line"
+                                    >{{ question['reply_content'] }}</textarea>
                                 {% else %}
                                     <textarea class="form-control" cols="8" rows="4" style="white-space: pre-line"></textarea>
                                 {% end %}

@@ -16,7 +16,7 @@
                 <td>Author</td>
                 <td>Timestamp</td>
                 <td>
-                    <a class="btn btn-primary" href="{{ url('/manage/bulletin/add/') }}">&#x271a</a>
+                    <a class="btn btn-primary" href="{{ url('/manage/bulletin/add/') }}">&#x271a;</a>
                 </td>
             </tr>
         </thead>
@@ -39,7 +39,7 @@
                 </font></td>
                 <td><font size=3>{{ bulletin['timestamp'].astimezone(config.TIMEZONE).strftime('%Y-%m-%d %H:%M:%S') }}</font></td>
                 <td>
-                    <a class="btn btn-secondary" href="{{ url(f'/manage/bulletin/update/?bulletin_id={ bulletin['bulletin_id'] }') }}">&#x2699</a>
+                    <a class="btn btn-secondary" href="{{ url(f'/manage/bulletin/update/?bulletin_id={ bulletin['bulletin_id'] }') }}">&#x2699;</a>
                 </td>
             </tr>
         {% end %}

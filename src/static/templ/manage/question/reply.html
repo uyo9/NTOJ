@@ -68,7 +68,7 @@
                     <td style="width:46%;">
                         <textarea class="form-control" cols="10" rows="10" id="{{ count }}" style="white-space: pre-line;"></textarea>
                     </td>
-                    <td style="width:8%;"><input class="btn btn-success" type="button" value="Reply" onclick="reply({{ count }});"></input></td>
+                    <td style="width:8%;"><input class="btn btn-success" type="button" value="Reply" onclick="reply({{ count }});"></td>
 
                 {% else %}
                     <td style="width:46%;">
@@ -76,7 +76,7 @@
                             {{ ques['A'] }}
                         </textarea>
                     </td>
-                    <td style="width:8%;"><input class="btn btn-success" type="button" value="Re Reply" onclick="rreply({{ count }});"></input></td>
+                    <td style="width:8%;"><input class="btn btn-success" type="button" value="Re Reply" onclick="rreply({{ count }});"></td>
                 {% end %}
             </tr>
             {% set count = count + 1 %}

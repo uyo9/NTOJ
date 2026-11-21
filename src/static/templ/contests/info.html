@@ -11,12 +11,12 @@
             let desc_tex = `{{ markdown_escape(contest.desc_after_contest) }}`;
         {% end %}
 
-        let descEle = document.getElementById('desc');
+        let descEle = document.getElementById("desc");
         descEle.innerHTML = DOMPurify.sanitize(marked.parse(index.unescape_html(desc_tex)));
         try {
             MathJax.typeset();
         } catch (e) {
-            console.warn('MathJax typeset error', e);
+            console.warn("MathJax typeset error", e);
         }
 
         $("#startFlexibleContest").on("click", function () {
@@ -24,17 +24,21 @@
                 return;
             }
             $(this).prop("disabled", true);
-            $.post("{{ url(f'/be/contests/{ contest.contest_id }/info') }}", {
-                reqtype: "start",
-            }, res => {
-                res = JSON.parse(res);
-                if (res.status === "S") {
-                    location.href = location.href; // refresh navbar
-                } else {
-                    index.show_notify_dialog(res.data, index.DIALOG_TYPE.error);
-                    $("#startFlexibleContest").prop("disabled", false);
-                }
-            });
+            $.post(
+                "{{ url(f'/be/contests/{ contest.contest_id }/info') }}",
+                {
+                    reqtype: "start",
+                },
+                (res) => {
+                    res = JSON.parse(res);
+                    if (res.status === "S") {
+                        location.href = location.href; // refresh navbar
+                    } else {
+                        index.show_notify_dialog(res.data, index.DIALOG_TYPE.error);
+                        $("#startFlexibleContest").prop("disabled", false);
+                    }
+                },
+            );
         });
     }
 </script>
@@ -95,7 +99,7 @@
                         {% if contest.reg_mode is RegMode.FREE_REG %}
                             <h5>Free Registration, no approval needed</h5>
                         {% elif contest.reg_mode is RegMode.REG_APPROVAL %}
-                            <h5>Free Registration, approval needed </h5>
+                            <h5>Free Registration, approval needed</h5>
                         {% end %}
                         <h5>{{ contest.reg_end.astimezone(config.TIMEZONE).strftime("%Y-%m-%d %H:%M:%S") }}</h5>
                     {% end %}
@@ -147,7 +151,6 @@
                         {% end %}
                     {% end %}
                 </div>
-
             </div>
         </div>
 

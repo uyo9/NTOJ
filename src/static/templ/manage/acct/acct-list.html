@@ -2,8 +2,7 @@
 {% block head %}
 
 <script type="text/javascript" id="contjs">
-    function init(){
-    }
+    function init() {}
 </script>
 {% end %}
 {% block content %}
@@ -22,25 +21,25 @@
                 </tr>
             </thead>
             <tbody>
-            {% for acct in acctlist %}
-                <tr>
-                    <td>{{ acct.acct_id }}</td>
-                    <td><a href="{{ url(f'/acct/{ acct.acct_id }/') }}">{{ acct.name }}</a></td>
-                    <td>{{ acct.mail }}</td>
-                    <td>{{ acct.lastip }}</td>
-                    <td>{{ acct.specific_ip}}</td>
-                    <td>
-                        {% if acct.is_kernel() %}
-                            Kernel
-                        {% else %}
-                            User
-                        {% end %}
-                    </td>
-                    <td>
-                        <a class="btn btn-secondary" href="{{ url(f'/manage/acct/update/?acct_id={ acct.acct_id }') }}">&#x2699;</a>
-                    </td>
-                </tr>
-            {% end %}
+                {% for acct in acctlist %}
+                    <tr>
+                        <td>{{ acct.acct_id }}</td>
+                        <td><a href="{{ url(f'/acct/{ acct.acct_id }/') }}">{{ acct.name }}</a></td>
+                        <td>{{ acct.mail }}</td>
+                        <td>{{ acct.lastip }}</td>
+                        <td>{{ acct.specific_ip}}</td>
+                        <td>
+                            {% if acct.is_kernel() %}
+                                Kernel
+                            {% else %}
+                                User
+                            {% end %}
+                        </td>
+                        <td>
+                            <a class="btn btn-secondary" href="{{ url(f'/manage/acct/update/?acct_id={ acct.acct_id }') }}">&#x2699;</a>
+                        </td>
+                    </tr>
+                {% end %}
             </tbody>
         </table>
     </div>

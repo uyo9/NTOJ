@@ -56,7 +56,9 @@
                         </tr>
                     {% end %}
                     {% if len(board_list) == 0 %}
-                        <tr><td colspan="{{ 3 if user.is_kernel() else 2 }}" class="text-center text-muted">No {{ board_name }} boards</td></tr>
+                        <tr>
+                            <td colspan="{{ 3 if user.is_kernel() else 2 }}" class="text-center text-muted">No {{ board_name }} boards</td>
+                        </tr>
                     {% end %}
                 </tbody>
             </table>

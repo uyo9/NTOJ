@@ -1,8 +1,7 @@
 {% extends '../manage.html' %}
 {% block head %}
 <script>
-    function init() {
-    }
+    function init() {}
 </script>
 {% end %}
 {% block content %}
@@ -21,24 +20,24 @@
                     </td>
                 </tr>
             </thead>
-    
+
             <tbody>
-            {% for proclass in proclass_list %}
-                <tr>
-                    <th scope="row">{{ proclass['proclass_id'] }}</th>
-                    <td>{{ proclass['name'] }}</td>
-                    {% set t = "" %}
-                    {% if proclass['type'] == ProClassConst.OFFICIAL_PUBLIC %}
-                        {% set t = "Public" %}
-                    {% elif proclass['type'] == ProClassConst.OFFICIAL_HIDDEN %}
-                        {% set t = "Hidden" %}
-                    {% end %}
-                    <td>{{ t }}</td>
-                    <td>
-                        <a class="btn btn-secondary" href="{{ url(f'/manage/proclass/update/?proclass_id={ proclass['proclass_id'] }') }}">&#x2699;</a>
-                    </td>
-                </tr>
-            {% end %}
+                {% for proclass in proclass_list %}
+                    <tr>
+                        <th scope="row">{{ proclass['proclass_id'] }}</th>
+                        <td>{{ proclass['name'] }}</td>
+                        {% set t = "" %}
+                        {% if proclass['type'] == ProClassConst.OFFICIAL_PUBLIC %}
+                            {% set t = "Public" %}
+                        {% elif proclass['type'] == ProClassConst.OFFICIAL_HIDDEN %}
+                            {% set t = "Hidden" %}
+                        {% end %}
+                        <td>{{ t }}</td>
+                        <td>
+                            <a class="btn btn-secondary" href="{{ url(f'/manage/proclass/update/?proclass_id={ proclass['proclass_id'] }') }}">&#x2699;</a>
+                        </td>
+                    </tr>
+                {% end %}
             </tbody>
         </table>
     </div>

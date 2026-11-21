@@ -1,14 +1,18 @@
 {# Batch problem code display - Simple pre/code structure for AJAX loading #}
-<pre id="code" class="line-numbers"
+<pre
+    id="code"
+    class="line-numbers"
     data-language=""
-    data-prismjs-copy="Copy" data-prismjs-copy-error="Copy Failed!!!" data-prismjs-copy-success="Copy Success!!!">
+    data-prismjs-copy="Copy"
+    data-prismjs-copy-error="Copy Failed!!!"
+    data-prismjs-copy-success="Copy Success!!!"
+>
     <code class=""></code>
 </pre>
 
 <script>
     // Syntax highlighting will be applied by Prism.js when this template is included
-    if (typeof Prism !== 'undefined') {
+    if (typeof Prism !== "undefined") {
         Prism.highlightAll();
     }
 </script>
-

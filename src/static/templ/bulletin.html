@@ -3,12 +3,12 @@
     function init() {
         let desc_tex = `{{ markdown_escape(bulletin['content']) }}`;
 
-        let descEle = document.getElementById('content');
+        let descEle = document.getElementById("content");
         descEle.innerHTML = DOMPurify.sanitize(marked.parse(index.unescape_html(desc_tex)));
         try {
             MathJax.typeset();
         } catch (e) {
-            console.warn('MathJax typeset error', e);
+            console.warn("MathJax typeset error", e);
         }
     }
 </script>

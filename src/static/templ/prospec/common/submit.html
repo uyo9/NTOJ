@@ -3,83 +3,81 @@
 
 <script type="text/javascript">
     function init() {
-        var j_submit = $('#submit');
+        var j_submit = $("#submit");
         let pro_id = "{{ pro.pro_id }}";
         let contest_id = "{{ contest_id }}";
         const sourceExtensions = {% raw json.dumps({int(compiler): COMPILER_INFOS[compiler].source_ext for compiler in allow_compilers}) %};
 
         function updateFilenames() {
-            const extension = sourceExtensions[j_submit.find('#compilerList').val()] || 'txt';
-            j_submit.find('[data-submission-format-label]').each(function() {
-                $(this).text($(this).data('submission-format-label').replace('%l', extension));
+            const extension = sourceExtensions[j_submit.find("#compilerList").val()] || "txt";
+            j_submit.find("[data-submission-format-label]").each(function () {
+                $(this).text($(this).data("submission-format-label").replace("%l", extension));
             });
         }
 
-        j_submit.find('input.file').on('click', function() {
+        j_submit.find("input.file").on("click", function () {
             this.value = null;
         });
 
-        j_submit.find('input.file').on('change', function(e) {
+        j_submit.find("input.file").on("change", function (e) {
             var reader = new FileReader();
 
-            const item = $(this).closest('.accordion-item');
-            reader.onload = function(e) {
-                const textarea = item.length
-                    ? item.find('textarea.code')
-                    : j_submit.find('textarea.code');
+            const item = $(this).closest(".accordion-item");
+            reader.onload = function (e) {
+                const textarea = item.length ? item.find("textarea.code") : j_submit.find("textarea.code");
                 textarea.val(reader.result);
                 if (item.length) {
-                    bootstrap.Collapse.getOrCreateInstance(item.find('.accordion-collapse')[0]).hide();
+                    bootstrap.Collapse.getOrCreateInstance(item.find(".accordion-collapse")[0]).hide();
                 }
             };
 
             reader.readAsText(this.files[0]);
         });
 
-        j_submit.find('button.submit').on('click', function(e) {
-            let compiler_type = j_submit.find('#compilerList').val();
+        j_submit.find("button.submit").on("click", function (e) {
+            let compiler_type = j_submit.find("#compilerList").val();
             const request = {
-                'reqtype': 'submit',
-                'pro_id': pro_id,
-                'compiler_type': compiler_type,
+                reqtype: "submit",
+                pro_id: pro_id,
+                compiler_type: compiler_type,
             };
-            const namedSources = j_submit.find('textarea[data-submission-format]');
+            const namedSources = j_submit.find("textarea[data-submission-format]");
             if (namedSources.length) {
                 const codes = {};
                 let hasEmptyFile = false;
-                namedSources.each(function() {
-                    codes[$(this).data('submission-format')] = this.value;
-                    if (this.value.trim() === '') hasEmptyFile = true;
+                namedSources.each(function () {
+                    codes[$(this).data("submission-format")] = this.value;
+                    if (this.value.trim() === "") hasEmptyFile = true;
                 });
                 if (hasEmptyFile) {
-                    index.show_notify_dialog('Every source file is required', index.DIALOG_TYPE.error);
+                    index.show_notify_dialog("Every source file is required", index.DIALOG_TYPE.error);
                     return;
                 }
                 request.codes = JSON.stringify(codes);
             } else {
-                const code = j_submit.find('textarea.code').val();
-                if (code.trim() === '') {
-                    index.show_notify_dialog('Code cannot be empty', index.DIALOG_TYPE.error);
+                const code = j_submit.find("textarea.code").val();
+                if (code.trim() === "") {
+                    index.show_notify_dialog("Code cannot be empty", index.DIALOG_TYPE.error);
                     return;
                 }
                 request.code = code;
             }
 
             if (!compiler_type) {
-                index.show_notify_dialog('Compiler is required', index.DIALOG_TYPE.error);
+                index.show_notify_dialog("Compiler is required", index.DIALOG_TYPE.error);
                 return;
             }
 
-            let url = '';
+            let url = "";
             if (contest_id !== "0") {
                 url = `{{ url('/be/contests/${contest_id}/submit') }}`;
             } else {
                 url = `{{ url('/be/submit') }}`;
             }
 
-            $.post(url, request, function(res) {
+            $.post(url, request, function (res) {
                 res = JSON.parse(res);
-                if (res.status == 'S') {
+                if (res.status == "S") {
                     if (contest_id !== "0") {
                         url = `{{ url('/contests/${contest_id}/chal/${res.data}/') }}`;
                     } else {
@@ -93,18 +91,18 @@
             });
         });
 
-        j_submit.find('textarea[data-submission-format]').on('blur', function() {
-            if (this.value.trim() !== '') {
-                const collapse = $(this).closest('.accordion-item').find('.accordion-collapse')[0];
+        j_submit.find("textarea[data-submission-format]").on("blur", function () {
+            if (this.value.trim() !== "") {
+                const collapse = $(this).closest(".accordion-item").find(".accordion-collapse")[0];
                 bootstrap.Collapse.getOrCreateInstance(collapse).hide();
             }
         });
-        j_submit.find('#compilerList').on('change', updateFilenames);
+        j_submit.find("#compilerList").on("change", updateFilenames);
         updateFilenames();
-        j_submit.find('textarea[data-submission-format]').each(function() {
-            if (this.value.trim() !== '') {
-                const collapse = $(this).closest('.accordion-item').find('.accordion-collapse')[0];
-                bootstrap.Collapse.getOrCreateInstance(collapse, {toggle: false}).hide();
+        j_submit.find("textarea[data-submission-format]").each(function () {
+            if (this.value.trim() !== "") {
+                const collapse = $(this).closest(".accordion-item").find(".accordion-collapse")[0];
+                bootstrap.Collapse.getOrCreateInstance(collapse, { toggle: false }).hide();
             }
         });
     }
@@ -129,41 +127,60 @@
 
             {% set challenge_source_files = getattr(pro.config.spec_config, "submission_format", None) %}
             {% if challenge_source_files %}
-            <div class="accordion mb-3" id="submissionFiles">
-                {% for index, filename in enumerate(challenge_source_files) %}
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="submissionHeading{{ index }}">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#submissionCollapse{{ index }}" aria-expanded="true"
-                                aria-controls="submissionCollapse{{ index }}">
-                            <span data-submission-format-label="{{ filename }}">{{ filename }}</span>
-                        </button>
-                    </h2>
-                    <div id="submissionCollapse{{ index }}" class="accordion-collapse collapse show"
-                         aria-labelledby="submissionHeading{{ index }}" data-bs-parent="#submissionFiles">
-                        <div class="accordion-body">
-                            <textarea class="code form-control font-monospace mb-3"
-                                      data-submission-format="{{ filename }}"
-                                      placeholder="Paste source code here..." rows="12"></textarea>
-                            <input type="file" class="file form-control">
-                            <div class="form-text">Select a file to fill this source and collapse it automatically.</div>
+                <div class="accordion mb-3" id="submissionFiles">
+                    {% for index, filename in enumerate(challenge_source_files) %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="submissionHeading{{ index }}">
+                                <button
+                                    class="accordion-button"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#submissionCollapse{{ index }}"
+                                    aria-expanded="true"
+                                    aria-controls="submissionCollapse{{ index }}"
+                                >
+                                    <span data-submission-format-label="{{ filename }}">{{ filename }}</span>
+                                </button>
+                            </h2>
+                            <div
+                                id="submissionCollapse{{ index }}"
+                                class="accordion-collapse collapse show"
+                                aria-labelledby="submissionHeading{{ index }}"
+                                data-bs-parent="#submissionFiles"
+                            >
+                                <div class="accordion-body">
+                                    <textarea
+                                        class="code form-control font-monospace mb-3"
+                                        data-submission-format="{{ filename }}"
+                                        placeholder="Paste source code here..."
+                                        rows="12"
+                                    ></textarea>
+                                    <input type="file" class="file form-control" />
+                                    <div class="form-text">
+                                        Select a file to fill this source and collapse it automatically.
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    {% end %}
                 </div>
-                {% end %}
-            </div>
             {% else %}
-            <div class="mb-3">
-                <label for="codeArea" class="form-label">Source Code</label>
-                <textarea id="codeArea" class="code form-control font-monospace" placeholder="Paste your code here..." rows="12"></textarea>
-                <div class="form-text">Or use the file upload below to load code from a file</div>
-            </div>
+                <div class="mb-3">
+                    <label for="codeArea" class="form-label">Source Code</label>
+                    <textarea
+                        id="codeArea"
+                        class="code form-control font-monospace"
+                        placeholder="Paste your code here..."
+                        rows="12"
+                    ></textarea>
+                    <div class="form-text">Or use the file upload below to load code from a file</div>
+                </div>
 
-            <div class="mb-3">
-                <label for="fileInput" class="form-label">Upload File (Optional)</label>
-                <input type="file" id="fileInput" class="file form-control">
-                <div class="form-text">Select a source code file to automatically fill the code area</div>
-            </div>
+                <div class="mb-3">
+                    <label for="fileInput" class="form-label">Upload File (Optional)</label>
+                    <input type="file" id="fileInput" class="file form-control" />
+                    <div class="form-text">Select a source code file to automatically fill the code area</div>
+                </div>
             {% end %}
 
             <div class="d-grid gap-2">
@@ -172,7 +189,6 @@
                 </button>
             </div>
         </form>
-
     </div>
     <div class="col-lg-2"></div>
 </div>

@@ -1,8 +1,7 @@
 {% extends '../manage.html' %}
 {% block head %}
 
-<script type="text/javascript">
-</script>
+<script type="text/javascript"></script>
 {% end %}
 {% block content %}
 {% import config %}
@@ -22,27 +21,29 @@
         </thead>
 
         <tbody>
-        {% for bulletin in bulletin_list %}
-            <tr>
-                <th scope="row">{{ bulletin['bulletin_id'] }}</th>
-                <td>
-                    <a href="{{ url(f'/bulletin/{ bulletin['bulletin_id'] }/') }}">
-                        {% if bulletin['pinned'] %}
-                            <span class="material-symbols-outlined">push_pin</span>
-                        {% end %}
-                        {{ bulletin['title'] }}
-                    </a>
-                </td>
-                <td style="color: {{ bulletin['color'] }}">{{ bulletin['color'] }}</td>
-                <td><font size=3>
-                    <a href="{{ url(f'/acct/{ bulletin['acct_id'] }/') }}">{{ bulletin['name'] }}</a>
-                </font></td>
-                <td><font size=3>{{ bulletin['timestamp'].astimezone(config.TIMEZONE).strftime('%Y-%m-%d %H:%M:%S') }}</font></td>
-                <td>
-                    <a class="btn btn-secondary" href="{{ url(f'/manage/bulletin/update/?bulletin_id={ bulletin['bulletin_id'] }') }}">&#x2699;</a>
-                </td>
-            </tr>
-        {% end %}
+            {% for bulletin in bulletin_list %}
+                <tr>
+                    <th scope="row">{{ bulletin['bulletin_id'] }}</th>
+                    <td>
+                        <a href="{{ url(f'/bulletin/{ bulletin['bulletin_id'] }/') }}">
+                            {% if bulletin['pinned'] %}
+                                <span class="material-symbols-outlined">push_pin</span>
+                            {% end %}
+                            {{ bulletin['title'] }}
+                        </a>
+                    </td>
+                    <td style="color: {{ bulletin['color'] }}">{{ bulletin['color'] }}</td>
+                    <td>
+                        <font size="3">
+                            <a href="{{ url(f'/acct/{ bulletin['acct_id'] }/') }}">{{ bulletin['name'] }}</a>
+                        </font>
+                    </td>
+                    <td><font size="3">{{ bulletin['timestamp'].astimezone(config.TIMEZONE).strftime('%Y-%m-%d %H:%M:%S') }}</font></td>
+                    <td>
+                        <a class="btn btn-secondary" href="{{ url(f'/manage/bulletin/update/?bulletin_id={ bulletin['bulletin_id'] }') }}">&#x2699;</a>
+                    </td>
+                </tr>
+            {% end %}
         </tbody>
     </table>
 </div>

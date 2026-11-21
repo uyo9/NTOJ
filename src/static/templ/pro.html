@@ -2,26 +2,32 @@
 {% from utils.numeric import merge_list_to_str %}
 
 <style>
-::selection {
-  background: rgba(0, 0, 255, 0.3);
-}
+    ::selection {
+        background: rgba(0, 0, 255, 0.3);
+    }
 
-::-moz-selection {
-  background: rgba(0, 0, 255, 0.3);
-}
+    ::-moz-selection {
+        background: rgba(0, 0, 255, 0.3);
+    }
 
-a {
-  border-radius: 10px;
-}
+    a {
+        border-radius: 10px;
+    }
 </style>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf_viewer.min.css" integrity="sha512-8LkkqbXJPviYJENC5Z8qC2uKz27x0tNgrZbzsAzt7zkw0/2lXtSdrslVhfrkcR+6LRmxjZxlqniSyWXimoaH5g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf_viewer.min.css"
+    integrity="sha512-8LkkqbXJPviYJENC5Z8qC2uKz27x0tNgrZbzsAzt7zkw0/2lXtSdrslVhfrkcR+6LRmxjZxlqniSyWXimoaH5g=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+/>
 <script type="text/javascript">
-    var pdf_url = '';
-    var html_url = '';
+    var pdf_url = "";
+    var html_url = "";
     {% if contest %}
         pdf_url = `{{ url(f'/contests/{ contest.contest_id }/pro/{ pro.pro_id }/cont.pdf') }}`;
-        html_url = `{{ url(f'/contests/{ contest.contest_id }/pro/{ pro.pro_id }/cont.html') }}`
+        html_url = `{{ url(f'/contests/{ contest.contest_id }/pro/{ pro.pro_id }/cont.html') }}`;
     {% else %}
         pdf_url = `{{ url(f'/pro/{ pro.pro_id }/cont.pdf') }}`;
         html_url = `{{ url(f'/pro/{ pro.pro_id }/cont.html') }}`;
@@ -34,7 +40,7 @@ a {
 
     function _cancel_pdf_rendering() {
         renderGen++;
-        activeRenderTasks.forEach(function(task) {
+        activeRenderTasks.forEach(function (task) {
             try {
                 task.cancel();
             } catch (e) {}
@@ -44,41 +50,46 @@ a {
 
     function init() {
         let PDFJS = pdfjsLib;
-        PDFJS.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.worker.min.mjs';
+        PDFJS.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.worker.min.mjs";
 
-        $('#tags').keydown(function(event) {
-            if (event.which == 13) // return
-                $('#tags').focusout();
+        $("#tags").keydown(function (event) {
+            if (event.which == 13)
+                // return
+                $("#tags").focusout();
         });
 
-        $('#tags').focusout(function(event) {
+        $("#tags").focusout(function (event) {
             var tags = event.target.value;
             if (tags.search(/^[a-zA-Z0-9-_, ]+$/) != -1 || tags.length == 0) {
-                $('#tags-invalid').hide();
-                $.post(`{{ url('/be/set-tags') }}`, {
-                    'pro_id': {{ pro.pro_id }},
-                    'tags': tags,
-                }, function() {
-                    $('#tags-done').show();
-                });
+                $("#tags-invalid").hide();
+                $.post(
+                    `{{ url('/be/set-tags') }}`,
+                    {
+                        pro_id: {{ pro.pro_id }},
+                        tags: tags,
+                    },
+                    function () {
+                        $("#tags-done").show();
+                    },
+                );
             } else {
                 event.target.focus();
-                $('#tags-invalid').show();
+                $("#tags-invalid").show();
             }
         });
 
-        $("#pdfbtn").on('click', function(event) {
+        $("#pdfbtn").on("click", function (event) {
             let url = `${pdf_url}?download=1`;
             let downloadLink = document.createElement("a");
 
             downloadLink.href = url;
             downloadLink.setAttribute("download", "");
-            downloadLink.target = 'downloadIframe';
+            downloadLink.target = "downloadIframe";
             downloadLink.click();
         });
 
         let viewer = 1;
-        $('#switchviewer').on('click', function() {
+        $("#switchviewer").on("click", function () {
             if (viewer == 1) {
                 _load_pdf_embed();
                 viewer = 2;
@@ -92,7 +103,7 @@ a {
         let lastWindowWidth = window.innerWidth;
         let lastWindowHeight = window.innerHeight;
 
-        onResize = function() {
+        onResize = function () {
             if (window.innerWidth === lastWindowWidth && window.innerHeight === lastWindowHeight) return;
 
             let widthChanged = window.innerWidth !== lastWindowWidth;
@@ -102,7 +113,7 @@ a {
             if (viewer == 1) {
                 if (widthChanged) {
                     clearTimeout(resizeTimer);
-                    resizeTimer = setTimeout(function() {
+                    resizeTimer = setTimeout(function () {
                         _render_pdf_pages(currentPdf);
                     }, 200);
                 }
@@ -110,57 +121,57 @@ a {
                 _resize_pdf_embed_viewer();
             }
         };
-        $(window).on('resize', onResize);
+        $(window).on("resize", onResize);
 
-        let j_cont = $('#cont');
-        let j_side = $('#side');
+        let j_cont = $("#cont");
+        let j_side = $("#side");
 
         let currentHeight = 0;
         let lastRecordedWidth = 0;
         let lastIsDesktop = null;
 
         function _resize_pdf_embed_viewer(force = false) {
-            const isDesktop = window.matchMedia('(min-width: 992px)').matches;
+            const isDesktop = window.matchMedia("(min-width: 992px)").matches;
 
-            const modeChanged = (lastIsDesktop !== null && lastIsDesktop !== isDesktop);
+            const modeChanged = lastIsDesktop !== null && lastIsDesktop !== isDesktop;
             lastIsDesktop = isDesktop;
 
             if (isDesktop) {
                 let top = j_cont[0].getBoundingClientRect().top;
-                let footerH = $('footer').outerHeight(true) || 0;
+                let footerH = $("footer").outerHeight(true) || 0;
 
                 let targetHeight = Math.max(600, window.innerHeight - top - footerH);
 
                 if (force || modeChanged || Math.abs(targetHeight - currentHeight) > 2) {
                     currentHeight = targetHeight;
-                    j_cont.css('height', `${ currentHeight }px`);
-                    j_side.css('height', `${ currentHeight }px`);
+                    j_cont.css("height", `${currentHeight}px`);
+                    j_side.css("height", `${currentHeight}px`);
                 }
             } else {
-                j_side.css('height', 'auto');
+                j_side.css("height", "auto");
 
                 if (force || modeChanged || Math.abs(window.innerWidth - lastRecordedWidth) > 10) {
                     lastRecordedWidth = window.innerWidth;
                     let targetHeight = Math.max(500, window.innerHeight * 0.75);
 
-                    j_cont.css('height', `${ targetHeight }px`);
+                    j_cont.css("height", `${targetHeight}px`);
                     currentHeight = 0;
                 }
             }
         }
 
         function _load_html() {
-            j_cont.css('height', 'auto');
-            j_side.css('height', `auto`);
-            j_cont.load(html_url, function(res, status, xhr) {
-                if (status == 'error') {
-                    $('#pdfbtn').show();
+            j_cont.css("height", "auto");
+            j_side.css("height", `auto`);
+            j_cont.load(html_url, function (res, status, xhr) {
+                if (status == "error") {
+                    $("#pdfbtn").show();
 
                     if (!navigator.pdfViewerEnabled) {
                         _load_pdf_js();
                         viewer = 1;
                     } else {
-                        $('#switchviewer').show();
+                        $("#switchviewer").show();
                         _load_pdf_embed();
                         viewer = 2;
                     }
@@ -168,7 +179,7 @@ a {
                     try {
                         MathJax.typeset();
                     } catch (e) {
-                        console.warn('MathJax typeset error', e);
+                        console.warn("MathJax typeset error", e);
                     }
                 }
             });
@@ -190,86 +201,92 @@ a {
             let dpr = window.devicePixelRatio || 1;
 
             for (let i = 0; i < pdf.numPages; i++) {
-                pdf.getPage(i + 1).then(function(idx) {
-                    return function(page) {
-                        if (gen !== renderGen) return;
+                pdf.getPage(i + 1).then(
+                    (function (idx) {
+                        return function (page) {
+                            if (gen !== renderGen) return;
 
-                        let j_page = $('#pdf-page-' + idx);
-                        let j_canvas = $('<canvas style="margin: 0; display:block;"></canvas>');
+                            let j_page = $("#pdf-page-" + idx);
+                            let j_canvas = $('<canvas style="margin: 0; display:block;"></canvas>');
 
-                        j_page.append(j_canvas);
+                            j_page.append(j_canvas);
 
-                        let j_div = $('<div></div>');
-                        let ctx = j_canvas[0].getContext('2d');
-                        let viewport;
+                            let j_div = $("<div></div>");
+                            let ctx = j_canvas[0].getContext("2d");
+                            let viewport;
 
-                        let scale = j_page.width() / page.getViewport({scale: 1}).width;
-                        viewport = page.getViewport({scale: scale * dpr});
+                            let scale = j_page.width() / page.getViewport({ scale: 1 }).width;
+                            viewport = page.getViewport({ scale: scale * dpr });
 
-                        j_canvas.attr('width', viewport.width);
-                        j_canvas.attr('height', viewport.height);
-                        j_canvas.css('width', (viewport.width / dpr) + 'px');
-                        j_canvas.css('height', (viewport.height / dpr) + 'px');
+                            j_canvas.attr("width", viewport.width);
+                            j_canvas.attr("height", viewport.height);
+                            j_canvas.css("width", viewport.width / dpr + "px");
+                            j_canvas.css("height", viewport.height / dpr + "px");
 
-                        j_div.addClass('textLayer');
-                        j_div.css({
-                            'position': 'absolute',
-                            'left': 0,
-                            'top': 0,
-                            'width': (viewport.width / dpr) + 'px',
-                            'height': (viewport.height / dpr) + 'px'
-                        });
-                        j_div[0].style.setProperty('--scale-factor', scale);
-
-                        j_page.append(j_div);
-
-                        const renderTask = page.render({canvasContext: ctx, viewport: viewport});
-                        activeRenderTasks.push(renderTask);
-
-                        renderTask.promise
-                            .finally(function() {
-                                const index = activeRenderTasks.indexOf(renderTask);
-                                if (index !== -1) {
-                                    activeRenderTasks.splice(index, 1);
-                                }
-                            })
-                            .then(function () {
-                                if (gen !== renderGen) return;
-                                return page.getTextContent();
-                            })
-                            .then(function (text) {
-                                if (gen !== renderGen || !text) return;
-
-                                const textLayer = new PDFJS.TextLayer({
-                                    textContentSource: text,
-                                    container: j_div[0],
-                                    viewport: page.getViewport({scale: scale}),
-                                });
-                                textLayer.render().catch(function(err) {
-                                    if (gen !== renderGen) return;
-                                    console.error(`PDF failed to render text layer for page ${idx}:`, err);
-                                });
-                            })
-                            .catch(function (err) {
-                                if (err?.name !== 'RenderingCancelledException') {
-                                    console.error(`PDF failed to render page ${idx}:`, err);
-                                }
+                            j_div.addClass("textLayer");
+                            j_div.css({
+                                position: "absolute",
+                                left: 0,
+                                top: 0,
+                                width: viewport.width / dpr + "px",
+                                height: viewport.height / dpr + "px",
                             });
-                    };
-                }(i + 1));
+                            j_div[0].style.setProperty("--scale-factor", scale);
+
+                            j_page.append(j_div);
+
+                            const renderTask = page.render({ canvasContext: ctx, viewport: viewport });
+                            activeRenderTasks.push(renderTask);
+
+                            renderTask.promise
+                                .finally(function () {
+                                    const index = activeRenderTasks.indexOf(renderTask);
+                                    if (index !== -1) {
+                                        activeRenderTasks.splice(index, 1);
+                                    }
+                                })
+                                .then(function () {
+                                    if (gen !== renderGen) return;
+                                    return page.getTextContent();
+                                })
+                                .then(function (text) {
+                                    if (gen !== renderGen || !text) return;
+
+                                    const textLayer = new PDFJS.TextLayer({
+                                        textContentSource: text,
+                                        container: j_div[0],
+                                        viewport: page.getViewport({ scale: scale }),
+                                    });
+                                    textLayer.render().catch(function (err) {
+                                        if (gen !== renderGen) return;
+                                        console.error(`PDF failed to render text layer for page ${idx}:`, err);
+                                    });
+                                })
+                                .catch(function (err) {
+                                    if (err?.name !== "RenderingCancelledException") {
+                                        console.error(`PDF failed to render page ${idx}:`, err);
+                                    }
+                                });
+                        };
+                    })(i + 1),
+                );
             }
         }
 
         function _load_pdf_js() {
-            j_cont.css('height', 'auto');
-            j_side.css('height', `auto`);
-            PDFJS.getDocument(pdf_url).promise.then(function(pdf) {
-                currentPdf = pdf;
-                _render_pdf_pages(currentPdf);
-            }).catch(function(err) {
-                console.error("PDF failed to load:", err);
-                j_cont.html('<strong>Could not load PDF file. Either reload the page or contact the administrator.</strong>');
-            });
+            j_cont.css("height", "auto");
+            j_side.css("height", `auto`);
+            PDFJS.getDocument(pdf_url)
+                .promise.then(function (pdf) {
+                    currentPdf = pdf;
+                    _render_pdf_pages(currentPdf);
+                })
+                .catch(function (err) {
+                    console.error("PDF failed to load:", err);
+                    j_cont.html(
+                        "<strong>Could not load PDF file. Either reload the page or contact the administrator.</strong>",
+                    );
+                });
         }
 
         function _load_pdf_embed() {
@@ -285,7 +302,7 @@ a {
         function _listen_dpr_change() {
             const dpr = window.devicePixelRatio || 1;
             const mq = window.matchMedia(`(resolution: ${dpr}dppx)`);
-            const handler = function() {
+            const handler = function () {
                 if (viewer === 1 && currentPdf) {
                     _render_pdf_pages(currentPdf);
                 }
@@ -293,7 +310,7 @@ a {
             };
 
             if (mq.addEventListener) {
-                mq.addEventListener('change', handler, { once: true });
+                mq.addEventListener("change", handler, { once: true });
             } else if (mq.addListener) {
                 mq.addListener(handler);
             }
@@ -305,13 +322,13 @@ a {
 
     function destroy() {
         if (onResize) {
-            $(window).off('resize', onResize);
+            $(window).off("resize", onResize);
             onResize = null;
         }
     }
 </script>
 <div class="row">
-    <div id="side" class="col-lg-2 col-12 pt-lg-2 pb-3 pb-lg-0 pb-xl-0" style="overflow-y: scroll;">
+    <div id="side" class="col-lg-2 col-12 pt-lg-2 pb-3 pb-lg-0 pb-xl-0" style="overflow-y: scroll">
         <h3>{{ pro.pro_id}} / {{ pro.name }}</h3>
         {% if can_submit and pro.allow_submit %}
             {% if contest and not contest_session.is_ended() %}
@@ -331,49 +348,61 @@ a {
                 <a class="btn btn-success" href="{{ url(f'/rank/{ pro.pro_id }/') }}">&nbsp;Rank&nbsp;</a>
                 <a class="btn btn-secondary" href="{{ url(f'/chal/?pro_id={ pro.pro_id }') }}">Status</a>
             {% end %}
-
         </div>
 
         <div class="my-lg-1">
-            <a class="btn btn-warning my-lg-1" style="display: none; width: 156px; text-align: center;" id="pdfbtn">Download PDF</a>
-            <a class="btn btn-warning my-lg-1" id="switchviewer" style="display: none; width: 156px; text-align: center;">Switch Viewer</a>
+            <a class="btn btn-warning my-lg-1" style="display: none; width: 156px; text-align: center" id="pdfbtn"
+                >Download PDF</a
+            >
+            <a class="btn btn-warning my-lg-1" id="switchviewer" style="display: none; width: 156px; text-align: center"
+                >Switch Viewer</a
+            >
         </div>
         {% if user.is_kernel() and not contest %}
-            <input id="tags" value="{{ pro.tags }}" style="width: 190px" placeholder="add tags here">
+            <input id="tags" value="{{ pro.tags }}" style="width: 190px" placeholder="add tags here" />
         {% else %}
-            <input id="tags" value="{{ pro.tags }}" style="width: 190px" placeholder="no tags" disabled>
+            <input id="tags" value="{{ pro.tags }}" style="width: 190px" placeholder="no tags" disabled />
         {% end %}
-        <div>
-
-        </div>
-        <span id="tags-invalid" style="color:#e74c3c; display: none">TAGS INVALID!</span>
+        <div></div>
+        <span id="tags-invalid" style="color: #e74c3c; display: none">TAGS INVALID!</span>
         <span id="tags-done" style="color: green; display: none">SET TAGS SUCCESS</span>
-        <br>
+        <br />
 
         {% if not contest %}
             {% if topcoder %}
                 <div class="my-lg-1" id="topcoder">
                     <div class="card">
-                    <div class="card-header">TopCoder</div>
-                    <div class="card-body">
-                        {% if topcoder.photo == "" %}
-                        {% set topcoder.photo = f"https://www.gravatar.com/avatar/{ topcoder.acct_id }?d=identicon&f=y&s=480;" %}
-                        {% end %}
-                        <img src="{{ topcoder.photo }}" style="max-width:100px; max-height:100px; position:relative; left:50px; transform:translateX(-50%);" />
-                        <div class="card-text-group">
-                            <h5 class="card-title"><a href="{{ url(f'/acct/{ topcoder.acct_id }/') }}">{{ topcoder.name }}</a></h5>
-                            <p class="card-text">{{ topcoder.motto }}</p>
+                        <div class="card-header">TopCoder</div>
+                        <div class="card-body">
+                            {% if topcoder.photo == "" %}
+                                {% set topcoder.photo = f"https://www.gravatar.com/avatar/{ topcoder.acct_id }?d=identicon&f=y&s=480;" %}
+                            {% end %}
+                            <img
+                                src="{{ topcoder.photo }}"
+                                style="
+                                    max-width: 100px;
+                                    max-height: 100px;
+                                    position: relative;
+                                    left: 50px;
+                                    transform: translateX(-50%);
+                                "
+                            />
+                            <div class="card-text-group">
+                                <h5 class="card-title"><a href="{{ url(f'/acct/{ topcoder.acct_id }/') }}">{{ topcoder.name }}</a></h5>
+                                <p class="card-text">{{ topcoder.motto }}</p>
+                            </div>
                         </div>
-                    </div>
                     </div>
                 </div>
             {% else %}
                 <div class="my-lg-1" id="topcoder">
                     <div class="card">
-                    <div class="card-header">TopCoder</div>
-                    <div class="card-body">
-                        <h5 class="card-title">Waiting for you to become the first <span class="state-1">accepted</span>.</h5>
-                    </div>
+                        <div class="card-header">TopCoder</div>
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                Waiting for you to become the first <span class="state-1">accepted</span>.
+                            </h5>
+                        </div>
                     </div>
                 </div>
             {% end %}
@@ -393,18 +422,18 @@ a {
                     {% set default = pro.config.limits.pop('default') %}
                     <tr>
                         <td>default</td>
-                        <td>{{ default.time }} </td>
-                        <td>{{ default.memory }} </td>
-                        <td>{{ default.output }} </td>
+                        <td>{{ default.time }}</td>
+                        <td>{{ default.memory }}</td>
+                        <td>{{ default.output }}</td>
                     </tr>
 
                     {% for compiler, limit in pro.config.limits.items() %}
-                    <tr>
-                        <td>{{ COMPILER_INFOS[int(compiler)].short_name }}</td>
-                        <td>{{ limit.time }} </td>
-                        <td>{{ limit.memory }} </td>
-                        <td>{{ limit.output }} </td>
-                    </tr>
+                        <tr>
+                            <td>{{ COMPILER_INFOS[int(compiler)].short_name }}</td>
+                            <td>{{ limit.time }}</td>
+                            <td>{{ limit.memory }}</td>
+                            <td>{{ limit.output }}</td>
+                        </tr>
                     {% end %}
                 </tbody>
             </table>

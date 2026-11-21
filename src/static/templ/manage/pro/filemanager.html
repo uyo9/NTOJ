@@ -1,8 +1,11 @@
 {% extends '../manage.html' %}
 {% block head %}
 <style>
-   #editor { height: 400px; width: 100%; }
-   #keybindingSelect {
+    #editor {
+        height: 400px;
+        width: 100%;
+    }
+    #keybindingSelect {
         position: absolute;
         top: 10px;
         right: 10px;
@@ -15,22 +18,22 @@
     }
 </style>
 <script src="{{ url('/src/third/prism.js') }}"></script>
-<link rel="stylesheet" href="{{ url('/src/third/prism.css') }}">
+<link rel="stylesheet" href="{{ url('/src/third/prism.css') }}" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.43.3/ace.js"></script>
 
 <script type="text/javascript" id="contjs">
     function init() {
         let pro_id = "{{ pro_id }}";
-        let preview_modal = new bootstrap.Modal(document.getElementById('previewModal'));
-        let add_single_file_modal = new bootstrap.Modal(document.getElementById('addSingleFileModal'));
+        let preview_modal = new bootstrap.Modal(document.getElementById("previewModal"));
+        let add_single_file_modal = new bootstrap.Modal(document.getElementById("addSingleFileModal"));
         let aceEditor = null;
         let isEditorModified = false;
 
         const handleApiResponse = (res, onSuccess, onError) => {
-            let msg = '';
+            let msg = "";
             let dialog_type = null;
             res = JSON.parse(res);
-            if (res.status == 'S') {
+            if (res.status == "S") {
                 dialog_type = index.DIALOG_TYPE.success;
                 msg = onSuccess ? onSuccess(res) : res.data;
             } else {
@@ -42,114 +45,126 @@
         };
 
         const uploadFile = (file, progressMsg, callback) => {
-            pack.get_token().done(function(token) {
+            pack.get_token().done(function (token) {
                 index.create_progress_bar(progressMsg);
-                pack.send(token, file).done(function () {
-                    index.update_progress_bar_progress(100);
-                    callback(token);
-                }).progress(function(prog) {
-                    index.update_progress_bar_progress(prog * 100);
-                });
+                pack.send(token, file)
+                    .done(function () {
+                        index.update_progress_bar_progress(100);
+                        callback(token);
+                    })
+                    .progress(function (prog) {
+                        index.update_progress_bar_progress(prog * 100);
+                    });
             });
         };
 
-        document.querySelectorAll('a.preview-file').forEach(el => {
-            el.addEventListener('click', function (e) {
-                let tr = $(this).parents('tr');
-                let path = $(this).parents('.accordion-collapse').attr('path');
-                let filename = tr.attr('filename');
+        document.querySelectorAll("a.preview-file").forEach((el) => {
+            el.addEventListener("click", function (e) {
+                let tr = $(this).parents("tr");
+                let path = $(this).parents(".accordion-collapse").attr("path");
+                let filename = tr.attr("filename");
 
-                let file_content = '';
-                $.post(`{{ url('/be/manage/pro/filemanager') }}`, {
-                    'reqtype': 'preview',
-                    'pro_id': pro_id,
-                    'filename': filename,
-                    'path': path,
-                }, function (res) {
-                    res = JSON.parse(res);
-                    file_content = res.data;
+                let file_content = "";
+                $.post(
+                    `{{ url('/be/manage/pro/filemanager') }}`,
+                    {
+                        reqtype: "preview",
+                        pro_id: pro_id,
+                        filename: filename,
+                        path: path,
+                    },
+                    function (res) {
+                        res = JSON.parse(res);
+                        file_content = res.data;
 
-                    const ext = filename.split('.').pop();
-                    const langMap = {
-                        'html': 'html',
-                        'htm': 'html',
-                        'css': 'css',
-                        'js': 'javascript',
-                        'json': 'json',
-                        'xml': 'xml',
-                        'md': 'markdown',
-                        'sh': 'sh',
-                        'c': 'c_cpp',
-                        'cpp': 'c_cpp',
-                        'h': 'c_cpp',
-                        'py': 'python',
-                        'java': 'java',
-                        'rs': 'rust',
-                        's': 'assembly_x86',
-                    };
-                    const lang = langMap[ext] || 'text';
+                        const ext = filename.split(".").pop();
+                        const langMap = {
+                            html: "html",
+                            htm: "html",
+                            css: "css",
+                            js: "javascript",
+                            json: "json",
+                            xml: "xml",
+                            md: "markdown",
+                            sh: "sh",
+                            c: "c_cpp",
+                            cpp: "c_cpp",
+                            h: "c_cpp",
+                            py: "python",
+                            java: "java",
+                            rs: "rust",
+                            s: "assembly_x86",
+                        };
+                        const lang = langMap[ext] || "text";
 
-                    $('#langList').val(lang);
+                        $("#langList").val(lang);
 
-                    $("#preview-title").text(filename);
-                    $("#preview-title").attr("filename", filename);
-                    $("#preview-title").attr("path", path);
-                    Prism.highlightAll();
-                    preview_modal.show();
-                    if (!aceEditor) {
-                        aceEditor = ace.edit("editor");
-                        aceEditor.setTheme("ace/theme/twilight");
-                        aceEditor.session.on("change", editorChangeHandler);
-                    }
-                    aceEditor.session.setMode("ace/mode/" + lang);
-                    aceEditor.setValue(file_content, -1);
-                    isEditorModified = false;
-                });
+                        $("#preview-title").text(filename);
+                        $("#preview-title").attr("filename", filename);
+                        $("#preview-title").attr("path", path);
+                        Prism.highlightAll();
+                        preview_modal.show();
+                        if (!aceEditor) {
+                            aceEditor = ace.edit("editor");
+                            aceEditor.setTheme("ace/theme/twilight");
+                            aceEditor.session.on("change", editorChangeHandler);
+                        }
+                        aceEditor.session.setMode("ace/mode/" + lang);
+                        aceEditor.setValue(file_content, -1);
+                        isEditorModified = false;
+                    },
+                );
             });
         });
 
-        $("#previewModal").find("button.download").on('click', function(e) {
-            let filename = $("#preview-title").attr("filename");
-            let path = $("#preview-title").attr("path");
+        $("#previewModal")
+            .find("button.download")
+            .on("click", function (e) {
+                let filename = $("#preview-title").attr("filename");
+                let path = $("#preview-title").attr("path");
 
-            let url = "{{ url('/be/manage/pro/filemanager') }}";
-            window.open(`${url}?pro_id=${pro_id}&download=1&filename=${filename}&path=${path}`);
-        });
+                let url = "{{ url('/be/manage/pro/filemanager') }}";
+                window.open(`${url}?pro_id=${pro_id}&download=1&filename=${filename}&path=${path}`);
+            });
 
-        $("#previewModal").find("button.save").on('click', function(e) {
-            const filename = $("#preview-title").attr("filename");
-            const path = $("#preview-title").attr("path");
-            const content = aceEditor.getValue();
+        $("#previewModal")
+            .find("button.save")
+            .on("click", function (e) {
+                const filename = $("#preview-title").attr("filename");
+                const path = $("#preview-title").attr("path");
+                const content = aceEditor.getValue();
 
-            // Create a file-like object
-            const file = new File([content], filename, { type: "text/plain" });
+                // Create a file-like object
+                const file = new File([content], filename, { type: "text/plain" });
 
-            uploadFile(file, 'Saving...', function(token) {
-                $.post(`{{ url('/be/manage/pro/filemanager') }}`, {
-                    'reqtype': 'updatesinglefile',
-                    'pack_token': token,
-                    'pro_id': pro_id,
-                    'filename': filename,
-                    'path': path,
-                }, function (res) {
-                    index.remove_progress_bar();
-                    handleApiResponse(res,
-                        (r) => `Save ${filename} successfully.`
+                uploadFile(file, "Saving...", function (token) {
+                    $.post(
+                        `{{ url('/be/manage/pro/filemanager') }}`,
+                        {
+                            reqtype: "updatesinglefile",
+                            pack_token: token,
+                            pro_id: pro_id,
+                            filename: filename,
+                            path: path,
+                        },
+                        function (res) {
+                            index.remove_progress_bar();
+                            handleApiResponse(res, (r) => `Save ${filename} successfully.`);
+                            resetEditor();
+                            isEditorModified = false;
+                            preview_modal.hide();
+                            index.reload();
+                        },
                     );
-                    resetEditor();
-                    isEditorModified = false;
-                    preview_modal.hide();
-                    index.reload();
                 });
             });
-        });
 
-        $('#keybindingSelect').on('change', function(e) {
+        $("#keybindingSelect").on("change", function (e) {
             const kb = $(this).val();
             aceEditor.setKeyboardHandler("ace/keyboard/" + kb);
         });
 
-        $('#langList').on('change', function(e) {
+        $("#langList").on("change", function (e) {
             const lang = $(this).val();
             aceEditor.session.setMode("ace/mode/" + lang);
         });
@@ -162,14 +177,14 @@
             if (aceEditor) {
                 aceEditor.session.getUndoManager().reset();
                 aceEditor.clearSelection();
-                aceEditor.setValue('', -1);
+                aceEditor.setValue("", -1);
             }
         };
 
-        document.getElementById('previewModal').addEventListener('hide.bs.modal', function (e) {
+        document.getElementById("previewModal").addEventListener("hide.bs.modal", function (e) {
             if (isEditorModified) {
                 e.preventDefault();
-                const confirmed = confirm('There are unsaved changes. Are you sure you want to close?');
+                const confirmed = confirm("There are unsaved changes. Are you sure you want to close?");
                 if (confirmed) {
                     isEditorModified = false;
                     resetEditor();
@@ -180,62 +195,66 @@
             }
         });
 
-        document.querySelectorAll('button.rename-single-file').forEach(el => {
-            el.addEventListener('click', function (e) {
-                let path = $(this).parents('.accordion-collapse').attr('path');
-                let old_filename = $(this).parents('tr').attr('filename');
-                let new_filename = prompt('New filename', old_filename);
+        document.querySelectorAll("button.rename-single-file").forEach((el) => {
+            el.addEventListener("click", function (e) {
+                let path = $(this).parents(".accordion-collapse").attr("path");
+                let old_filename = $(this).parents("tr").attr("filename");
+                let new_filename = prompt("New filename", old_filename);
 
-                $.post(`{{ url('/be/manage/pro/filemanager') }}`, {
-                    'reqtype': 'renamesinglefile',
-                    'pro_id': pro_id,
-                    'old_filename': old_filename,
-                    'new_filename': new_filename,
-                    'path': path,
-                }, function (res) {
-                    handleApiResponse(res,
-                        (r) => `Rename ${old_filename} to ${new_filename} successfully.`
-                    );
-                    index.reload();
-                });
+                $.post(
+                    `{{ url('/be/manage/pro/filemanager') }}`,
+                    {
+                        reqtype: "renamesinglefile",
+                        pro_id: pro_id,
+                        old_filename: old_filename,
+                        new_filename: new_filename,
+                        path: path,
+                    },
+                    function (res) {
+                        handleApiResponse(res, (r) => `Rename ${old_filename} to ${new_filename} successfully.`);
+                        index.reload();
+                    },
+                );
             });
         });
 
-        document.querySelectorAll('button.delete-single-file').forEach(el => {
-            el.addEventListener('click', function (e) {
-                if (!confirm('Are you sure to delete this file?')) {
+        document.querySelectorAll("button.delete-single-file").forEach((el) => {
+            el.addEventListener("click", function (e) {
+                if (!confirm("Are you sure to delete this file?")) {
                     return;
                 }
-                let path = $(this).parents('.accordion-collapse').attr('path');
-                let filename = $(this).parents('tr').attr('filename');
+                let path = $(this).parents(".accordion-collapse").attr("path");
+                let filename = $(this).parents("tr").attr("filename");
 
-                $.post(`{{ url('/be/manage/pro/filemanager') }}`, {
-                    'reqtype': 'deletesinglefile',
-                    'pro_id': pro_id,
-                    'filename': filename,
-                    'path': path,
-                }, function (res) {
-                    handleApiResponse(res,
-                        (r) => `Delete ${filename} successfully.`
-                    );
-                    index.reload();
-                });
+                $.post(
+                    `{{ url('/be/manage/pro/filemanager') }}`,
+                    {
+                        reqtype: "deletesinglefile",
+                        pro_id: pro_id,
+                        filename: filename,
+                        path: path,
+                    },
+                    function (res) {
+                        handleApiResponse(res, (r) => `Delete ${filename} successfully.`);
+                        index.reload();
+                    },
+                );
             });
         });
 
         let j_add_single_file = $("#addSingleFileModal");
-        $("button.add-single-file").on('click', function(e) {
-            j_add_single_file.attr('path', $(this).attr('path'));
+        $("button.add-single-file").on("click", function (e) {
+            j_add_single_file.attr("path", $(this).attr("path"));
             j_add_single_file.find("input.filename").val("");
             j_add_single_file.find("input.file").val("");
             add_single_file_modal.show();
         });
 
-        j_add_single_file.find("button.cancel").on('click', function(e) {
+        j_add_single_file.find("button.cancel").on("click", function (e) {
             add_single_file_modal.hide();
         });
 
-        j_add_single_file.find("input.file").on('change', function(e) {
+        j_add_single_file.find("input.file").on("change", function (e) {
             let input_filename = j_add_single_file.find("input.filename").val();
             if (input_filename.length == 0) {
                 let files = e.target.files;
@@ -246,74 +265,78 @@
             }
         });
 
-        j_add_single_file.find("button.upload").on('click', function(e) {
+        j_add_single_file.find("button.upload").on("click", function (e) {
             add_single_file_modal.hide();
 
-            let path = j_add_single_file.attr('path');
+            let path = j_add_single_file.attr("path");
             let filename = j_add_single_file.find("input.filename").val();
             if (filename.length == 0) {
-                index.show_notify_dialog('Filename should not empty', index.DIALOG_TYPE.error);
+                index.show_notify_dialog("Filename should not empty", index.DIALOG_TYPE.error);
                 return;
             }
 
             let files = j_add_single_file.find("input.file")[0].files;
 
             if (files.length == 0) {
-                index.show_notify_dialog('File should not empty', index.DIALOG_TYPE.error);
+                index.show_notify_dialog("File should not empty", index.DIALOG_TYPE.error);
                 return;
             }
             let file = files[0];
 
-            uploadFile(file, 'File Uploading...', function(token) {
-                $.post(`{{ url('/be/manage/pro/filemanager') }}`, {
-                    'reqtype': 'addsinglefile',
-                    'pack_token': token,
-                    'pro_id': pro_id,
-                    'filename': filename,
-                    'path': path,
-                }, function (res) {
-                    index.remove_progress_bar();
-                    handleApiResponse(res,
-                        (r) => `Upload single file ${filename} successfully`
-                    );
-                    j_add_single_file.find("input.file").val("");
-                    index.reload();
-                });
+            uploadFile(file, "File Uploading...", function (token) {
+                $.post(
+                    `{{ url('/be/manage/pro/filemanager') }}`,
+                    {
+                        reqtype: "addsinglefile",
+                        pack_token: token,
+                        pro_id: pro_id,
+                        filename: filename,
+                        path: path,
+                    },
+                    function (res) {
+                        index.remove_progress_bar();
+                        handleApiResponse(res, (r) => `Upload single file ${filename} successfully`);
+                        j_add_single_file.find("input.file").val("");
+                        index.reload();
+                    },
+                );
             });
         });
 
-        document.querySelectorAll('button.update-single-file').forEach(el => {
-            let j_input = $(el).siblings('input');
-            let path = $(el).parents('.accordion-collapse').attr('path');
+        document.querySelectorAll("button.update-single-file").forEach((el) => {
+            let j_input = $(el).siblings("input");
+            let path = $(el).parents(".accordion-collapse").attr("path");
 
-            el.addEventListener('click', function (e) {
+            el.addEventListener("click", function (e) {
                 j_input.click();
                 e.preventDefault();
                 e.stopPropagation();
             });
 
-            j_input.on('change', function (e) {
+            j_input.on("change", function (e) {
                 if (e.target.files.length == 0) {
                     return;
                 }
 
-                let filename = $(this).parents('tr').attr('filename');
+                let filename = $(this).parents("tr").attr("filename");
                 let file = e.target.files[0];
-                uploadFile(file, 'Uploading...', function(token) {
-                    $.post(`{{ url('/be/manage/pro/filemanager') }}`, {
-                        'reqtype': 'updatesinglefile',
-                        'pack_token': token,
-                        'pro_id': pro_id,
-                        'filename': filename,
-                        'path': path,
-                    }, function (res) {
-                        index.remove_progress_bar();
-                        handleApiResponse(res,
-                            (r) => `Update ${filename} successfully.`
-                        );
-                        j_input.val(''); // for the same file upload
-                        index.reload();
-                    });
+                uploadFile(file, "Uploading...", function (token) {
+                    $.post(
+                        `{{ url('/be/manage/pro/filemanager') }}`,
+                        {
+                            reqtype: "updatesinglefile",
+                            pack_token: token,
+                            pro_id: pro_id,
+                            filename: filename,
+                            path: path,
+                        },
+                        function (res) {
+                            index.remove_progress_bar();
+                            handleApiResponse(res, (r) => `Update ${filename} successfully.`);
+                            j_input.val(""); // for the same file upload
+                            index.reload();
+                        },
+                    );
                 });
             });
         });
@@ -330,7 +353,7 @@
             </div>
 
             <div class="modal-body">
-                <div style="position: relative;">
+                <div style="position: relative">
                     <select id="keybindingSelect">
                         <option value="ace">Default</option>
                         <option value="vim">Vim</option>
@@ -375,9 +398,9 @@
             <div class="modal-body">
                 <form>
                     <label for="" class="form-label">Filename</label>
-                    <input class="form-control filename" type="text">
+                    <input class="form-control filename" type="text" />
                     <label for="" class="form-label">File</label>
-                    <input type="file" class="form-control file">
+                    <input type="file" class="form-control file" />
                 </form>
             </div>
 
@@ -386,15 +409,14 @@
                 <button class="btn btn-secondary cancel">Cancel</button>
             </div>
         </div>
-
     </div>
 </div>
 
 <div class="col-lg-10 ms-lg-2 mt-lg-2">
     <div class="accordion" id="dirs">
-    {% for dir_idx, dir in enumerate(dirs) %}
-        <div class="accordion-item">
-            <h2 class="accordion-header">
+        {% for dir_idx, dir in enumerate(dirs) %}
+            <div class="accordion-item">
+                <h2 class="accordion-header">
                     <button
                         class="accordion-button collapsed"
                         type="button"
@@ -405,42 +427,49 @@
                     >
                         {{ f"problem/{pro_id}/{dir['path']}" }}
                     </button>
-            </h2>
-            <div id="collapse{{ dir_idx }}" class="accordion-collapse collapse" data-bs-parent="#tests" path="{{ dir['path'] }}">
-                <div class="accordion-body">
-                    <button class="btn btn-primary add-single-file" path="{{ dir['path'] }}">Add Single File</button>
-                    <div class="table-responsive">
-                        <table class="table table-hover table-sm my-3">
-                            <thead>
-                                <tr>
-                                    <th scope="col">#</th>
-                                    <th scope="col">Filename</th>
-                                    <th scope="col">Operation</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                {% for file_idx, filename in enumerate(dir['files']) %}
-                                    <tr idx="{{ file_idx }}" filename="{{ filename }}">
-                                        <th scope="row">{{ file_idx + 1 }}</th>
-                                        <td><a class="preview-file">{{ filename }}</a></td>
-                                        <td>
-                                            <div class="btn-toolbar">
-                                                <input type="file" style="display: none;">
-                                                <button class="btn btn-primary me-2 update-single-file">Update</button>
-                                                <button class="btn btn-danger me-2 delete-single-file">Delete</button>
-                                                <button class="btn btn-secondary me-2 rename-single-file">Rename</button>
-                                            </div>
-                                        </td>
+                </h2>
+                <div
+                    id="collapse{{ dir_idx }}"
+                    class="accordion-collapse collapse"
+                    data-bs-parent="#tests"
+                    path="{{ dir['path'] }}"
+                >
+                    <div class="accordion-body">
+                        <button class="btn btn-primary add-single-file" path="{{ dir['path'] }}">
+                            Add Single File
+                        </button>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm my-3">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Filename</th>
+                                        <th scope="col">Operation</th>
                                     </tr>
-                                {% end %}
-                            </tbody>
-                        </table>
+                                </thead>
+
+                                <tbody>
+                                    {% for file_idx, filename in enumerate(dir['files']) %}
+                                        <tr idx="{{ file_idx }}" filename="{{ filename }}">
+                                            <th scope="row">{{ file_idx + 1 }}</th>
+                                            <td><a class="preview-file">{{ filename }}</a></td>
+                                            <td>
+                                                <div class="btn-toolbar">
+                                                    <input type="file" style="display: none" />
+                                                    <button class="btn btn-primary me-2 update-single-file">Update</button>
+                                                    <button class="btn btn-danger me-2 delete-single-file">Delete</button>
+                                                    <button class="btn btn-secondary me-2 rename-single-file">Rename</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% end %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    {% end %}
+        {% end %}
     </div>
 </div>
 {% end %}

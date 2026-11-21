@@ -3,15 +3,15 @@
 {% block head %}
 <script type="text/javascript" id="contjs">
     function init() {
-        let desc_textarea = document.getElementById('contestDesc');
-        let desc_preview = document.getElementById('descPreviewDialog');
+        let desc_textarea = document.getElementById("contestDesc");
+        let desc_preview = document.getElementById("descPreviewDialog");
         let desc_preview_modal = new bootstrap.Modal(desc_preview);
 
         let desc_before_contest = index.unescape_html(`{{ markdown_escape(contest.desc_before_contest) }}`);
         let desc_during_contest = index.unescape_html(`{{ markdown_escape(contest.desc_during_contest) }}`);
         let desc_after_contest = index.unescape_html(`{{ markdown_escape(contest.desc_after_contest) }}`);
 
-        let cur_desc_type = 'before';
+        let cur_desc_type = "before";
         const is_unsaved = () => {
             switch (cur_desc_type) {
                 case "before":
@@ -19,32 +19,32 @@
                 case "during":
                     return desc_textarea.value != desc_during_contest;
                 case "after":
-                    return desc_textarea.value != desc_after_contest
+                    return desc_textarea.value != desc_after_contest;
             }
         };
 
         const auto_scroll = () => {
             const newHeight = desc_textarea.scrollHeight;
             if (newHeight > desc_textarea.offsetHeight) {
-                desc_textarea.style.height = newHeight + 'px';
+                desc_textarea.style.height = newHeight + "px";
             }
-        }
+        };
         desc_textarea.value = desc_before_contest;
-        desc_textarea.addEventListener('input', (event) => auto_scroll());
+        desc_textarea.addEventListener("input", (event) => auto_scroll());
         auto_scroll();
 
-        window.onbeforeunload = function() {
+        window.onbeforeunload = function () {
             if (is_unsaved()) {
-                return 'There are unsaved changes';
+                return "There are unsaved changes";
             }
-        }
+        };
 
-        $("#descType").on('change', function (e) {
+        $("#descType").on("change", function (e) {
             let desc_type = $(this).val();
             if (desc_type == cur_desc_type) return;
 
             if (is_unsaved()) {
-                index.show_notify_dialog('There are unsaved changes', index.DIALOG_TYPE.warning);
+                index.show_notify_dialog("There are unsaved changes", index.DIALOG_TYPE.warning);
                 $(this).val(cur_desc_type);
                 return;
             }
@@ -64,43 +64,47 @@
             auto_scroll();
         });
 
-        $("button.preview").on('click', function(e) {
-            let body = desc_preview.querySelector('.modal-body');
+        $("button.preview").on("click", function (e) {
+            let body = desc_preview.querySelector(".modal-body");
             body.innerHTML = DOMPurify.sanitize(marked.parse(desc_textarea.value));
             try {
                 MathJax.typeset();
             } catch (e) {
-                console.warn('MathJax typeset error', e);
+                console.warn("MathJax typeset error", e);
             }
             desc_preview_modal.show();
         });
 
-        $("button.submit").on('click', function(e) {
+        $("button.submit").on("click", function (e) {
             let desc_type = $("#descType").val();
-            $.post(`{{ url(f'/be/contests/{ contest_id }/manage/desc') }}`, {
-                reqtype: 'update',
-                desc_type: desc_type,
-                desc: desc_textarea.value,
-            }, res => {
-                res = JSON.parse(res);
-                if (res.status == 'S') {
-                    switch (desc_type) {
-                        case "before":
-                            desc_before_contest = desc_textarea.value;
-                            break;
-                        case "during":
-                            desc_during_contest = desc_textarea.value;
-                            break;
-                        case "after":
-                            desc_after_contest = desc_textarea.value;
-                            break;
+            $.post(
+                `{{ url(f'/be/contests/{ contest_id }/manage/desc') }}`,
+                {
+                    reqtype: "update",
+                    desc_type: desc_type,
+                    desc: desc_textarea.value,
+                },
+                (res) => {
+                    res = JSON.parse(res);
+                    if (res.status == "S") {
+                        switch (desc_type) {
+                            case "before":
+                                desc_before_contest = desc_textarea.value;
+                                break;
+                            case "during":
+                                desc_during_contest = desc_textarea.value;
+                                break;
+                            case "after":
+                                desc_after_contest = desc_textarea.value;
+                                break;
+                        }
+                        index.show_notify_dialog("Update Successfully", index.DIALOG_TYPE.success);
+                    } else {
+                        index.show_notify_dialog(res.data, index.DIALOG_TYPE.error);
                     }
-                    index.show_notify_dialog('Update Successfully', index.DIALOG_TYPE.success);
-                } else {
-                    index.show_notify_dialog(res.data, index.DIALOG_TYPE.error);
-                }
-            });
-        })
+                },
+            );
+        });
     }
 </script>
 {% end %}
@@ -108,18 +112,17 @@
 {% block content %}
 
 <div class="modal fade" id="descPreviewDialog" tabindex="-1" aria-hidden="true">
-<div class="modal-dialog modal-dialog-scrollable modal-xl">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Preview Markdown Render</h2>
-        </div>
-        <div class="modal-body">
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    <div class="modal-dialog modal-dialog-scrollable modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Preview Markdown Render</h2>
+            </div>
+            <div class="modal-body"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
         </div>
     </div>
-</div>
 </div>
 
 <div class="col-lg-10 ms-lg-2 mt-lg-2">
@@ -135,8 +138,6 @@
 
     <button class="btn btn-primary submit">Update</button>
     <button class="btn btn-secondary preview">Preview</button>
-
 </div>
-
 
 {% end %}

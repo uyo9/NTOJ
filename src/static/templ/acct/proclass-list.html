@@ -14,22 +14,22 @@
         </thead>
 
         <tbody>
-        {% for proclass in proclass_list %}
-            <tr>
-                <th scope="row">{{ proclass['proclass_id'] }}</th>
-                <td>{{ proclass['name'] }}</td>
-                {% set t = "" %}
-                {% if proclass['type'] == ProClassConst.USER_PUBLIC %}
-                    {% set t = "Public" %}
-                {% elif proclass['type'] == ProClassConst.USER_HIDDEN %}
-                    {% set t = "Hidden" %}
-                {% end %}
-                <td>{{ t }}</td>
-                <td>
-                    <a class="btn btn-secondary" href="{{ url(f'/acct/proclass/{ user.acct_id }/?page=update&proclass_id={ proclass['proclass_id'] }') }}">&#x2699;</a>
-                </td>
-            </tr>
-        {% end %}
+            {% for proclass in proclass_list %}
+                <tr>
+                    <th scope="row">{{ proclass['proclass_id'] }}</th>
+                    <td>{{ proclass['name'] }}</td>
+                    {% set t = "" %}
+                    {% if proclass['type'] == ProClassConst.USER_PUBLIC %}
+                        {% set t = "Public" %}
+                    {% elif proclass['type'] == ProClassConst.USER_HIDDEN %}
+                        {% set t = "Hidden" %}
+                    {% end %}
+                    <td>{{ t }}</td>
+                    <td>
+                        <a class="btn btn-secondary" href="{{ url(f'/acct/proclass/{ user.acct_id }/?page=update&proclass_id={ proclass['proclass_id'] }') }}">&#x2699;</a>
+                    </td>
+                </tr>
+            {% end %}
         </tbody>
     </table>
 </div>

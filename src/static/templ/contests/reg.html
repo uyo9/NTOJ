@@ -4,46 +4,58 @@
 
 <script>
     function init() {
-        $("button.reg").on('click', e => {
-            $.post(`{{ url(f'/be/contests/{ contest.contest_id }/reg') }}`, {
-                'reqtype': 'reg',
-            }, res => {
-                res = JSON.parse(res);
-                if (res.status == 'S') {
-                    index.show_notify_dialog(res.data, index.DIALOG_TYPE.success);
-                } else {
-                    index.show_notify_dialog(res.data, index.DIALOG_TYPE.error);
-                }
-                index.reload();
-            })
+        $("button.reg").on("click", (e) => {
+            $.post(
+                `{{ url(f'/be/contests/{ contest.contest_id }/reg') }}`,
+                {
+                    reqtype: "reg",
+                },
+                (res) => {
+                    res = JSON.parse(res);
+                    if (res.status == "S") {
+                        index.show_notify_dialog(res.data, index.DIALOG_TYPE.success);
+                    } else {
+                        index.show_notify_dialog(res.data, index.DIALOG_TYPE.error);
+                    }
+                    index.reload();
+                },
+            );
         });
 
-        $("button.unreg").on('click', e => {
-            $.post(`{{ url(f'/be/contests/{ contest.contest_id }/reg') }}`, {
-                'reqtype': 'unreg',
-            }, res => {
-                res = JSON.parse(res);
-                if (res.status == 'S') {
-                    index.show_notify_dialog(res.data, index.DIALOG_TYPE.success);
-                } else {
-                    index.show_notify_dialog(res.data, index.DIALOG_TYPE.error);
-                }
-                index.reload();
-            })
+        $("button.unreg").on("click", (e) => {
+            $.post(
+                `{{ url(f'/be/contests/{ contest.contest_id }/reg') }}`,
+                {
+                    reqtype: "unreg",
+                },
+                (res) => {
+                    res = JSON.parse(res);
+                    if (res.status == "S") {
+                        index.show_notify_dialog(res.data, index.DIALOG_TYPE.success);
+                    } else {
+                        index.show_notify_dialog(res.data, index.DIALOG_TYPE.error);
+                    }
+                    index.reload();
+                },
+            );
         });
 
-        $("button.cancel-register").on('click', e => {
-            $.post(`{{ url(f'/be/contests/{ contest.contest_id }/reg') }}`, {
-                'reqtype': 'cancelreq',
-            }, res => {
-                res = JSON.parse(res);
-                if (res.status == 'S') {
-                    index.show_notify_dialog(res.data, index.DIALOG_TYPE.success);
-                } else {
-                    index.show_notify_dialog(res.data, index.DIALOG_TYPE.error);
-                }
-                index.reload();
-            })
+        $("button.cancel-register").on("click", (e) => {
+            $.post(
+                `{{ url(f'/be/contests/{ contest.contest_id }/reg') }}`,
+                {
+                    reqtype: "cancelreq",
+                },
+                (res) => {
+                    res = JSON.parse(res);
+                    if (res.status == "S") {
+                        index.show_notify_dialog(res.data, index.DIALOG_TYPE.success);
+                    } else {
+                        index.show_notify_dialog(res.data, index.DIALOG_TYPE.error);
+                    }
+                    index.reload();
+                },
+            );
         });
     }
 </script>
@@ -78,7 +90,7 @@
         <div class="mb-1 text-center">
             <label class="form-label">Status: {{ status }}</label>
             {% if contest.reg_mode is not RegMode.INVITED %}
-            <label class="form-label">Registration End: {{ contest.reg_end.astimezone(config.TIMEZONE).strftime("%Y-%m-%d %H:%M:%S") }}</label>
+                <label class="form-label">Registration End: {{ contest.reg_end.astimezone(config.TIMEZONE).strftime("%Y-%m-%d %H:%M:%S") }}</label>
             {% end %}
 
             {% set now = datetime.datetime.now(datetime.UTC) %}
@@ -96,6 +108,5 @@
                 {% end %}
             {% end %}
         </div>
-
     </div>
 </div>
